@@ -26,7 +26,7 @@ const submitQuiz = async (req, res, next) => {
     quiz.questions.forEach(q => { questionMap[q._id.toString()] = q; });
 
     // Calculate expected number of questions
-    const expectedLength = Math.min(5, quiz.questions.length);
+    const expectedLength = Math.min(10, quiz.questions.length);
     if (answers.length !== expectedLength) {
        return res.status(400).json({ success: false, message: `Expected ${expectedLength} answers, got ${answers.length}.` });
     }
