@@ -1,4 +1,5 @@
 const Quiz = require('./quizModel');
+const User = require('./User');
 
 // ── GET /api/quizzes ───────────────────────────────────────────────────────
 // List all active quizzes (no questions, just metadata)
@@ -27,9 +28,16 @@ const getQuiz = async (req, res, next) => {
     // toSafeObject() strips correctIndex from every question
     const safeQuiz = quiz.toSafeObject();
     
-    // Shuffle and pick 10 questions for this user's session
+    // Shuffle and pick N questions for this user's session
+    const limit = quiz.numberOfQuestions || 10;
     const shuffled = safeQuiz.questions.sort(() => 0.5 - Math.random());
-    safeQuiz.questions = shuffled.slice(0, 10);
+    safeQuiz.questions = shuffled.slice(0, limit);
+
+    // Update user's live status
+    await User.findByIdAndUpdate(req.user.userId, {
+      liveStatus: 'in_progress',
+      lastActiveAt: new Date()
+    });
 
     res.json({ success: true, quiz: safeQuiz });
   } catch (err) {

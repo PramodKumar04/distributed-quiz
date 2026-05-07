@@ -1,5 +1,6 @@
 const Quiz   = require('./quizModel');
 const Result = require('./resultModel');
+const User   = require('./User');
 const { PORT } = require('./env');
 
 // ── POST /api/quiz/submit ──────────────────────────────────────────────────
@@ -26,7 +27,8 @@ const submitQuiz = async (req, res, next) => {
     quiz.questions.forEach(q => { questionMap[q._id.toString()] = q; });
 
     // Calculate expected number of questions
-    const expectedLength = Math.min(10, quiz.questions.length);
+    const limit = quiz.numberOfQuestions || 10;
+    const expectedLength = Math.min(limit, quiz.questions.length);
     if (answers.length !== expectedLength) {
        return res.status(400).json({ success: false, message: `Expected ${expectedLength} answers, got ${answers.length}.` });
     }
@@ -69,6 +71,12 @@ const submitQuiz = async (req, res, next) => {
       passed,
       timeTaken:  timeTaken || 0,
       serverNode: `server-${PORT}`, // tracks which node handled the request — useful for DS demo
+    });
+
+    // Update user's live status
+    await User.findByIdAndUpdate(req.user.userId, {
+      liveStatus: 'completed',
+      lastActiveAt: new Date()
     });
 
     // 5. Send result — include per-question breakdown for instant display

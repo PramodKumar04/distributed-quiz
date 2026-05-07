@@ -12,6 +12,7 @@ const quizSchema = new mongoose.Schema({
   description: { type: String },
   timeLimit: { type: Number, required: true },
   isActive: { type: Boolean, default: true },
+  numberOfQuestions: { type: Number, default: 10 },
   questions: [questionSchema],
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });

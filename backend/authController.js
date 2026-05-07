@@ -13,7 +13,7 @@ const signToken = (user) =>
 // ── POST /api/auth/register ────────────────────────────────────────────────
 const register = async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
 
     if (!username || !email || !password) {
       return res.status(400).json({ success: false, message: 'username, email and password are required.' });
@@ -23,7 +23,9 @@ const register = async (req, res, next) => {
     }
 
     // Create user — pre-save hook hashes the password
-    const user = await User.create({ username, email, passwordHash: password });
+    const userPayload = { username, email, passwordHash: password };
+    if (role) userPayload.role = role;
+    const user = await User.create(userPayload);
     const token = signToken(user);
 
     res.status(201).json({

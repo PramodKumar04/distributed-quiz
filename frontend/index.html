@@ -11,19 +11,19 @@
 <style>
 /* ── DESIGN TOKENS ── */
 :root {
-  --bg:       #0c0e12;
-  --surface:  #13161d;
-  --panel:    #1a1e28;
-  --border:   #252a38;
-  --border2:  #2e3447;
-  --ink:      #e8eaf0;
-  --ink2:     #8b90a4;
-  --ink3:     #4f5468;
-  --accent:   #4f8ef7;
-  --accent2:  #7eb3ff;
-  --green:    #3ecf8e;
-  --red:      #f7614f;
-  --amber:    #f5a623;
+  --bg:       #f8fafc;
+  --surface:  #ffffff;
+  --panel:    #f1f5f9;
+  --border:   #e2e8f0;
+  --border2:  #cbd5e1;
+  --ink:      #0f172a;
+  --ink2:     #475569;
+  --ink3:     #94a3b8;
+  --accent:   #3b82f6;
+  --accent2:  #60a5fa;
+  --green:    #10b981;
+  --red:      #ef4444;
+  --amber:    #f59e0b;
   --serif:    'Instrument Serif', Georgia, serif;
   --mono:     'DM Mono', monospace;
   --sans:     'DM Sans', sans-serif;
@@ -88,7 +88,7 @@ body::before {
 .auth-header {
   padding: 36px 40px 28px;
   border-bottom: 1px solid var(--border);
-  background: linear-gradient(135deg, #0f1420 0%, #131829 100%);
+  background: var(--surface);
 }
 
 .auth-logo {
@@ -218,7 +218,7 @@ body::before {
   font-family: var(--mono); font-size: 11px; color: var(--ink2);
   padding: 10px 40px;
   border-top: 1px solid var(--border);
-  background: #0e1118;
+  background: var(--panel);
 }
 .status-dot {
   width: 6px; height: 6px; border-radius: 50%; background: var(--green);
@@ -242,7 +242,7 @@ body::before {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 40px;
   height: 60px;
-  background: rgba(12,14,18,0.9);
+  background: rgba(255,255,255,0.9);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -423,7 +423,7 @@ body::before {
   padding: 20px 28px 16px;
   border-bottom: 1px solid var(--border);
   display: flex; align-items: flex-start; gap: 16px;
-  background: linear-gradient(135deg, #10141f 0%, #141828 100%);
+  background: var(--surface);
 }
 
 .q-number {
@@ -720,6 +720,56 @@ body::before {
   .result-hero { padding: 32px 20px; }
   #screen-result { padding: 32px 16px 60px; }
 }
+
+/* ══════════════════════════════════════
+   ADMIN SCREEN
+══════════════════════════════════════ */
+#screen-admin {
+  flex-direction: column;
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.admin-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 32px;
+}
+.admin-title { font-family: var(--serif); font-size: 32px; color: var(--ink); }
+
+.admin-panels {
+  display: grid; grid-template-columns: 3fr 1fr; gap: 24px;
+}
+
+.admin-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+}
+.admin-card-title {
+  font-family: var(--mono); font-size: 14px; font-weight: 500;
+  margin-bottom: 16px; color: var(--ink2); text-transform: uppercase;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.user-table { width: 100%; border-collapse: collapse; }
+.user-table th, .user-table td {
+  padding: 12px; text-align: left; border-bottom: 1px solid var(--border);
+  font-size: 14px; color: var(--ink);
+}
+.user-table th { font-family: var(--mono); font-size: 12px; color: var(--ink2); font-weight: 500; }
+.user-table tr:last-child td { border-bottom: none; }
+
+.status-badge {
+  display: inline-block; padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 500; font-family: var(--mono); text-transform: uppercase;
+}
+.status-badge.idle { background: var(--panel); color: var(--ink2); border: 1px solid var(--border); }
+.status-badge.in_progress { background: rgba(59,130,246,0.12); color: var(--accent); border: 1px solid rgba(59,130,246,0.2); }
+.status-badge.completed { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+
+.admin-input { width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--panel); color: var(--ink); font-family: var(--sans); margin-bottom: 12px; }
+
 </style>
 </head>
 <body>
@@ -775,6 +825,10 @@ body::before {
         <div class="form-group">
           <label class="form-label">Password</label>
           <input class="form-input" type="password" id="reg-password" placeholder="min 8 characters"/>
+        </div>
+        <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="reg-admin" />
+          <label for="reg-admin" style="font-size: 13px; color: var(--ink2);">Register as Admin</label>
         </div>
         <button class="btn-primary" onclick="handleRegister()">Create account &nbsp;→</button>
       </div>
@@ -921,6 +975,55 @@ body::before {
   </div>
 </section>
 
+<!-- ══════════════════════════════════════
+     SCREEN 4: ADMIN
+══════════════════════════════════════ -->
+<section class="screen" id="screen-admin">
+  <div class="admin-header">
+    <h2 class="admin-title">Admin Dashboard</h2>
+    <div style="display: flex; gap: 12px;">
+      <button class="btn-outline" onclick="showScreen('screen-auth')">← Log out</button>
+      <button class="btn-outline" onclick="loadQuizAndStart()">Test Quiz</button>
+    </div>
+  </div>
+
+  <div class="admin-panels">
+    <div class="admin-card">
+      <div class="admin-card-title">
+        <span>Live Student Status</span>
+        <button class="btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="fetchAdminStatus()">Refresh ↺</button>
+      </div>
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Last Active</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="admin-user-list">
+          <tr><td colspan="5" style="text-align:center; color:var(--ink2)">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-title">Quiz Settings</div>
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label class="form-label">Active Quiz</label>
+        <select id="admin-quiz-select" class="admin-input" onchange="loadQuizSettings()"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Number of Questions</label>
+        <input type="number" id="admin-num-questions" class="admin-input" value="10" min="1" max="50"/>
+      </div>
+      <button class="btn-primary" onclick="updateQuizSettings()">Save Settings</button>
+    </div>
+  </div>
+</section>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -941,13 +1044,11 @@ let state = {
   submitted: false,
 };
 
-// --- CONFIGURATION ---
 const BACKEND_URLS = [
-  'http://localhost:3000',
   'https://distributed-quiz.onrender.com',
   'https://distributed-quiz-wa4m.vercel.app'
 ];
-let API_BASE = 'http://localhost:3000/api'; // Default fallback
+let API_BASE = 'https://distributed-quiz.onrender.com/api'; // Default fallback
 
 // --- CLIENT-SIDE LOAD BALANCING (Pick fastest backend) ---
 async function determineBestBackend() {
@@ -1028,7 +1129,11 @@ async function handleLogin() {
     state.token = data.token;
     localStorage.setItem('quizToken', data.token);
     toast('Signed in — good luck!', 'success');
-    setTimeout(loadQuizAndStart, 600);
+    if (state.user.role === 'admin') {
+      setTimeout(loadAdminDashboard, 600);
+    } else {
+      setTimeout(loadQuizAndStart, 600);
+    }
   } catch (err) {
     toast(err.message, 'error');
   }
@@ -1038,6 +1143,9 @@ async function handleRegister() {
   const username = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
+  const isAdmin = document.getElementById('reg-admin').checked;
+  const role = isAdmin ? 'admin' : 'student';
+
   if (!username || !email || !password) { toast('Please fill in all fields', 'error'); return; }
   if (password.length < 8) { toast('Password must be at least 8 characters', 'error'); return; }
 
@@ -1045,7 +1153,7 @@ async function handleRegister() {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password })
+      body: JSON.stringify({ username, email, password, role })
     });
     const data = await res.json();
     if (!data.success) throw new Error(data.message || 'Registration failed');
@@ -1054,7 +1162,11 @@ async function handleRegister() {
     state.token = data.token;
     localStorage.setItem('quizToken', data.token);
     toast('Account created! Signing you in…', 'success');
-    setTimeout(loadQuizAndStart, 800);
+    if (state.user.role === 'admin') {
+      setTimeout(loadAdminDashboard, 800);
+    } else {
+      setTimeout(loadQuizAndStart, 800);
+    }
   } catch (err) {
     toast(err.message, 'error');
   }
@@ -1062,6 +1174,113 @@ async function handleRegister() {
 
 function demoLogin() {
   toast('Demo mode requires backend now. Please register an account.', 'error');
+}
+
+/* ── ADMIN DASHBOARD ── */
+async function loadAdminDashboard() {
+  showScreen('screen-admin');
+  fetchAdminStatus();
+  await loadAdminQuizzes();
+}
+
+async function fetchAdminStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/admin/status`, { headers: getAuthHeaders() });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Failed to fetch status');
+    
+    const tbody = document.getElementById('admin-user-list');
+    tbody.innerHTML = '';
+    
+    if (data.users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--ink2)">No students registered yet.</td></tr>';
+      return;
+    }
+
+    data.users.forEach(u => {
+      const tr = document.createElement('tr');
+      const timeStr = u.lastActiveAt ? new Date(u.lastActiveAt).toLocaleTimeString() : 'Never';
+      const liveStatus = u.liveStatus || 'idle';
+      const statusText = liveStatus.replace('_', ' ');
+      tr.innerHTML = `
+        <td>${u.username}</td>
+        <td>${u.email}</td>
+        <td><span class="status-badge ${liveStatus}">${statusText}</span></td>
+        <td>${timeStr}</td>
+        <td><button class="btn-outline" style="padding: 4px 8px; font-size: 11px; border-color: var(--red); color: var(--red);" onclick="removeUser('${u._id}')">Remove</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    toast('Error: ' + err.message, 'error');
+  }
+}
+
+async function removeUser(userId) {
+  if (!confirm('Are you sure you want to remove this user and all their quiz results?')) return;
+  
+  try {
+    const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Failed to remove user');
+    
+    toast('User removed successfully', 'success');
+    fetchAdminStatus(); // Refresh the list
+  } catch (err) {
+    toast('Error: ' + err.message, 'error');
+  }
+}
+
+let adminQuizzes = [];
+
+async function loadAdminQuizzes() {
+  try {
+    const res = await fetch(`${API_BASE}/quizzes`, { headers: getAuthHeaders() });
+    const data = await res.json();
+    if (data.success && data.quizzes.length > 0) {
+      adminQuizzes = data.quizzes;
+      const select = document.getElementById('admin-quiz-select');
+      select.innerHTML = '';
+      adminQuizzes.forEach(q => {
+        const opt = document.createElement('option');
+        opt.value = q._id || q.id;
+        opt.textContent = q.title;
+        select.appendChild(opt);
+      });
+      // Optionally fetch quiz details to get current numberOfQuestions
+      // For simplicity, we just set the input to 10 or whatever is default
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function updateQuizSettings() {
+  const select = document.getElementById('admin-quiz-select');
+  const quizId = select.value;
+  if (!quizId) { toast('No active quiz selected.', 'error'); return; }
+
+  const num = parseInt(document.getElementById('admin-num-questions').value, 10);
+  if (isNaN(num) || num < 1) { toast('Invalid number of questions.', 'error'); return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/quizzes/${quizId}/settings`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ numberOfQuestions: num })
+    });
+    const data = await res.json();
+    if (data.success) {
+      toast('Quiz settings saved successfully!', 'success');
+    } else {
+      throw new Error(data.message || 'Failed to save settings.');
+    }
+  } catch (err) {
+    toast('Error: ' + err.message, 'error');
+  }
 }
 
 /* ── QUIZ ── */

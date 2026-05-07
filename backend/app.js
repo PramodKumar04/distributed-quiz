@@ -48,6 +48,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth',    require('./auth'));
 app.use('/api/quizzes', require('./quiz'));
 app.use('/api',         require('./result')); // /api/quiz/submit + /api/results
+app.use('/api/admin',   require('./admin'));
 
 // ── 404 handler ───────────────────────────────────────────────────────────
 app.use((req, res) => {

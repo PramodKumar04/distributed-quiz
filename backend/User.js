@@ -18,6 +18,12 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String, enum: ['student', 'admin'], default: 'student',
     },
+    liveStatus: {
+      type: String, enum: ['idle', 'in_progress', 'completed'], default: 'idle',
+    },
+    lastActiveAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
