@@ -18,32 +18,44 @@ const connectDB = require('./db');
 const { PORT }  = require('./env');
 
 const start = async () => {
-  // 1. Connect to MongoDB (replica set or standalone)
-  await connectDB();
+  try {
+    console.log('[Server] Starting node in ' + (process.env.NODE_ENV || 'development') + ' mode...');
+    
+    // 1. Connect to MongoDB
+    await connectDB();
 
-  // 2. Start HTTP server
-  const server = app.listen(PORT, () => {
-    console.log(`
+    // 2. Start HTTP server
+    const server = app.listen(PORT, () => {
+      console.log(`
 ╔══════════════════════════════════════════╗
-║  QuizOS Server  →  http://localhost:${PORT}  ║
+║  QuizOS Server  →  Listening on Port ${PORT}  ║
 ╚══════════════════════════════════════════╝
-    `);
-  });
-
-  // 3. Graceful shutdown — let in-flight requests finish before exiting
-  //    Important when Nginx detects a server is down and removes it from rotation
-  const shutdown = (signal) => {
-    console.log(`\n[${PORT}] Received ${signal}. Shutting down gracefully…`);
-    server.close(() => {
-      console.log(`[${PORT}] HTTP server closed.`);
-      process.exit(0);
+      `);
     });
-    // Force exit after 10s if server hasn't closed
-    setTimeout(() => process.exit(1), 10000);
-  };
 
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGINT',  () => shutdown('SIGINT'));
+    // 3. Graceful shutdown
+    const shutdown = (signal) => {
+      console.log(`\n[${PORT}] Received ${signal}. Shutting down gracefully…`);
+      server.close(() => {
+        console.log(`[${PORT}] HTTP server closed.`);
+        process.exit(0);
+      });
+      setTimeout(() => process.exit(1), 10000);
+    };
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT',  () => shutdown('SIGINT'));
+
+  } catch (err) {
+    console.error('[FATAL ERROR] Server failed to start:', err);
+    process.exit(1);
+  }
 };
+
+// Catch unhandled rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Unhandled Rejection] at:', promise, 'reason:', reason);
+  process.exit(1);
+});
 
 start();
