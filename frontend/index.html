@@ -1325,7 +1325,7 @@ setInterval(() => {
       const quizBarEl = document.getElementById('server-id-bar');
       
       if (statusEl) {
-        statusEl.textContent = `Render → Active Backend: ${data.server}`;
+        statusEl.textContent = `Connected: ${data.server}`;
       }
       if (quizBarEl) {
         quizBarEl.textContent = `Live Connection: ${data.server}`;
@@ -1334,7 +1334,7 @@ setInterval(() => {
     .catch(err => {
       const statusEl = document.getElementById('live-server-status');
       const quizBarEl = document.getElementById('server-id-bar');
-      if (statusEl) statusEl.textContent = "Render → Backend offline";
+      if (statusEl) statusEl.textContent = "Offline";
       if (quizBarEl) quizBarEl.textContent = "Connection Lost";
     });
 }, 2000);

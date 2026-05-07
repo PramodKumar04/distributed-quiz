@@ -4,8 +4,8 @@
   "description": "Distributed Quiz System - Backend API",
   "main": "server.js",
   "scripts": {
-    "start": "node loadBalancer.js",
-    "dev": "nodemon loadBalancer.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "server": "node server.js",
     "seed": "node seed.js",
     "lb": "node loadBalancer.js"
