@@ -8,9 +8,7 @@ const app = express();
 // ── CORS ───────────────────────────────────────────────────────────────────
 // Allow the frontend (any origin in dev, lock down in prod)
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? 'https://yourdomain.com'
-    : '*',
+  origin: '*', // For production, you should replace '*' with your actual frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
