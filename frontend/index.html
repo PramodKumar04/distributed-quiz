@@ -943,10 +943,11 @@ let state = {
 
 // --- CONFIGURATION ---
 const BACKEND_URLS = [
+  'http://localhost:3000',
   'https://distributed-quiz.onrender.com',
   'https://distributed-quiz-wa4m.vercel.app'
 ];
-let API_BASE = 'https://distributed-quiz.onrender.com/api'; // Default fallback
+let API_BASE = 'http://localhost:3000/api'; // Default fallback
 
 // --- CLIENT-SIDE LOAD BALANCING (Pick fastest backend) ---
 async function determineBestBackend() {
@@ -969,7 +970,7 @@ async function determineBestBackend() {
   const best = results[0];
   if (best.time !== Infinity) {
     API_BASE = best.url + '/api';
-    const provider = best.url.includes('vercel') ? 'Vercel' : 'Render';
+    const provider = best.url.includes('localhost') ? 'Local Server' : best.url.includes('vercel') ? 'Vercel' : 'Render';
     if (statusEl) statusEl.textContent = `Active Server: ${provider} (Ping: ${best.time}ms)`;
     console.log(`[LoadBalancer] Selected ${provider} backend (${best.time}ms)`);
   } else {
@@ -1110,7 +1111,8 @@ function startQuiz() {
   fetch(currentBackend + '/health')
     .then(res => res.json())
     .then(data => {
-      document.getElementById('server-id-bar').textContent = `Connected: ${data.server} (${currentBackend.includes('vercel') ? 'Vercel' : 'Render'})`;
+      const provider = currentBackend.includes('localhost') ? 'Local' : currentBackend.includes('vercel') ? 'Vercel' : 'Render';
+      document.getElementById('server-id-bar').textContent = `Connected: ${data.server} (${provider})`;
     })
     .catch(err => {
       document.getElementById('server-id-bar').textContent = `Connected: Unknown Server`;
@@ -1360,7 +1362,7 @@ setInterval(() => {
     .then(data => {
       const statusEl = document.getElementById('live-server-status');
       const quizBarEl = document.getElementById('server-id-bar');
-      const provider = currentBackend.includes('vercel') ? 'Vercel' : 'Render';
+      const provider = currentBackend.includes('localhost') ? 'Local Server' : currentBackend.includes('vercel') ? 'Vercel' : 'Render';
       
       if (statusEl && !statusEl.textContent.includes('Ping')) {
         statusEl.textContent = `Connected: ${provider}`;

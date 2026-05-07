@@ -2,8 +2,13 @@ const express      = require('express');
 const cors         = require('cors');
 const errorHandler = require('./errorHandler');
 const { PORT }     = require('./env');
+const connectDB    = require('./db');
 
 const app = express();
+
+// Connect to MongoDB for serverless environments (like Vercel)
+// Mongoose will buffer queries until the connection is established.
+connectDB();
 
 // ── CORS ───────────────────────────────────────────────────────────────────
 // Allow the frontend (any origin in dev, lock down in prod)
