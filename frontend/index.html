@@ -942,10 +942,43 @@ let state = {
 };
 
 // --- CONFIGURATION ---
-// Local development: http://localhost:3000/api
-// Production (Render): https://your-backend-name.onrender.com/api
-const API_BASE = 'https://distributed-quiz.onrender.com/api'; 
+const BACKEND_URLS = [
+  'https://distributed-quiz.onrender.com',
+  'https://distributed-quiz-wa4m.vercel.app'
+];
+let API_BASE = 'https://distributed-quiz.onrender.com/api'; // Default fallback
 
+// --- CLIENT-SIDE LOAD BALANCING (Pick fastest backend) ---
+async function determineBestBackend() {
+  const statusEl = document.getElementById('live-server-status');
+  if (statusEl) statusEl.textContent = "Analyzing traffic & pinging backends...";
+  
+  const pings = BACKEND_URLS.map(async (url) => {
+    const start = Date.now();
+    try {
+      await fetch(url + '/health', { cache: 'no-store', signal: AbortSignal.timeout(3000) });
+      return { url, time: Date.now() - start };
+    } catch(err) {
+      return { url, time: Infinity }; // Offline or timeout
+    }
+  });
+
+  const results = await Promise.all(pings);
+  results.sort((a, b) => a.time - b.time); // Sort by fastest response
+  
+  const best = results[0];
+  if (best.time !== Infinity) {
+    API_BASE = best.url + '/api';
+    const provider = best.url.includes('vercel') ? 'Vercel' : 'Render';
+    if (statusEl) statusEl.textContent = `Active Server: ${provider} (Ping: ${best.time}ms)`;
+    console.log(`[LoadBalancer] Selected ${provider} backend (${best.time}ms)`);
+  } else {
+    if (statusEl) statusEl.textContent = "All backends are currently offline!";
+  }
+}
+
+// Run immediately on page load
+window.addEventListener('DOMContentLoaded', determineBestBackend);
 
 /* ── UTILS ── */
 function showScreen(id) {
@@ -1073,10 +1106,11 @@ function startQuiz() {
   document.getElementById('user-avatar').textContent    = initials;
   document.getElementById('user-name-display').textContent = (state.user.username || '').split(' ')[0];
   
-  fetch('https://distributed-quiz.onrender.com/health')
+  const currentBackend = API_BASE.replace('/api', '');
+  fetch(currentBackend + '/health')
     .then(res => res.json())
     .then(data => {
-      document.getElementById('server-id-bar').textContent = `Connected: ${data.server}`;
+      document.getElementById('server-id-bar').textContent = `Connected: ${data.server} (${currentBackend.includes('vercel') ? 'Vercel' : 'Render'})`;
     })
     .catch(err => {
       document.getElementById('server-id-bar').textContent = `Connected: Unknown Server`;
@@ -1318,26 +1352,33 @@ function restartQuiz() {
 
 // Live status monitor
 setInterval(() => {
-  fetch('https://distributed-quiz.onrender.com/health')
+  if (!API_BASE) return;
+  const currentBackend = API_BASE.replace('/api', '');
+  
+  fetch(currentBackend + '/health')
     .then(res => res.json())
     .then(data => {
       const statusEl = document.getElementById('live-server-status');
       const quizBarEl = document.getElementById('server-id-bar');
+      const provider = currentBackend.includes('vercel') ? 'Vercel' : 'Render';
       
-      if (statusEl) {
-        statusEl.textContent = `Connected: ${data.server}`;
+      if (statusEl && !statusEl.textContent.includes('Ping')) {
+        statusEl.textContent = `Connected: ${provider}`;
       }
       if (quizBarEl) {
-        quizBarEl.textContent = `Live Connection: ${data.server}`;
+        quizBarEl.textContent = `Live: ${provider} (${data.server})`;
       }
     })
     .catch(err => {
       const statusEl = document.getElementById('live-server-status');
       const quizBarEl = document.getElementById('server-id-bar');
-      if (statusEl) statusEl.textContent = "Offline";
+      if (statusEl) statusEl.textContent = "Offline / Error";
       if (quizBarEl) quizBarEl.textContent = "Connection Lost";
+      
+      // If the current backend dies, try to find a new one!
+      determineBestBackend();
     });
-}, 2000);
+}, 5000);
 </script>
 </body>
 </html>
